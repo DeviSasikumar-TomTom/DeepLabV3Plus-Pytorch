@@ -144,7 +144,7 @@ def get_dataset(opts):
         ])
 
         train_dst = MVD(root=opts.data_root,
-                               split='train', transform=train_transform)
+                               split='train', args.label_mapping_config, transform=train_transform)
         val_dst = MVD(root=opts.data_root,
                              split='val', transform=val_transform)
     return train_dst, val_dst
