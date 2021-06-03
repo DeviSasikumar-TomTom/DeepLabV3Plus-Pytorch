@@ -1,0 +1,11 @@
+{
+  "camera_make": "Apple", 
+  "timestamp": "2014-11-09T06:49:09", 
+  "camera_model": "iPhone6,2", 
+  "weather": "sunny", 
+  "location": {
+    "lat": 22.252499, 
+    "lon": 114.178572
+  }, 
+  "compass": 35.015284098135055
+}

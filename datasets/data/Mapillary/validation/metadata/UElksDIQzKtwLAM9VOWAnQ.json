@@ -1,0 +1,10 @@
+{
+  "timestamp": "2014-06-07T11:43:43", 
+  "camera_make": "Apple", 
+  "camera_model": "iPhone5,2", 
+  "location": {
+    "lat": 52.224786, 
+    "lon": 20.958065
+  }, 
+  "compass": 352.05303004478844
+}

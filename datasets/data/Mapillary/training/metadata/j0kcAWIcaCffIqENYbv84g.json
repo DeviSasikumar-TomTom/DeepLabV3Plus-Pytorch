@@ -1,0 +1,10 @@
+{
+  "timestamp": "2016-05-17T14:53:26.614000", 
+  "camera_make": "samsung", 
+  "camera_model": "SM-G900F", 
+  "location": {
+    "lat": 50.82620277, 
+    "lon": 4.31389219
+  }, 
+  "compass": 314.3375352773017
+}

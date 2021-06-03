@@ -20,6 +20,8 @@ import transformations as tr
 class MVD():
     def __init__(self, root, label_mapping_config, training=True):
         self.root = root
+
+        #map_root_image = os.path.join(self.root,'images')
         self.files = []
         self.training = training
         label_mapping_yaml = open(label_mapping_config)
