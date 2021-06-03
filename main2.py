@@ -25,12 +25,14 @@ def get_argparser():
     parser = argparse.ArgumentParser()
 
     # Datset Options
-    parser.add_argument("--data_root", type=str, default='./datasets/data',
+    parser.add_argument("--data_dir", type=str, default='./datasets/data',
                         help="path to Dataset")
     parser.add_argument("--dataset", type=str, default='voc',
                         choices=['voc', 'cityscapes', 'mapillary'], help='Name of dataset')
     parser.add_argument("--num_classes", type=int, default=None,
                         help="num classes (default: None)")
+
+    parser.add_argument("--label-mapping-config", type=str, default=False, help="path to label mapping config yaml")
 
     # Deeplab Options
     parser.add_argument("--model", type=str, default='deeplabv3plus_resnet50',
@@ -210,12 +212,14 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     return score, ret_samples
 
 
-def main():
+def main2():
     opts = get_argparser().parse_args()
     if opts.dataset.lower() == 'voc':
         opts.num_classes = 21
     elif opts.dataset.lower() == 'cityscapes':
         opts.num_classes = 19
+    elif opts.dataset.lower() == 'mapillary':
+        opts.num_classes = 150
 
     # Setup visualization
     vis = Visualizer(port=opts.vis_port,
@@ -243,6 +247,16 @@ def main():
         val_dst, batch_size=opts.val_batch_size, shuffle=True, num_workers=2)
     print("Dataset: %s, Train set: %d, Val set: %d" %
           (opts.dataset, len(train_dst), len(val_dst)))
+
+    if opts.dataset == 'mapillary' and not opts.crop_val:
+        opts.val_batch_size = 1
+
+    train_dst,val_dst = get_dataset(opts)
+    train_loader = data.DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=2)
+    val_loader = data.DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=2)
+
+    print("Dataset: %s, Train set: %d, Val set: %d" %(opts.dataset, len(train_dst), len(val_dst)))
+
 
     # Set up model
     model_map = {
@@ -389,5 +403,5 @@ def main():
                 return
 
 
-if __name__ == '__main__':
+if __name__ == '__main2__':
     main()
