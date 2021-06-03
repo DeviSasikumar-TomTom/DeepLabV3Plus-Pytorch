@@ -9,45 +9,6 @@ import numpy as np
 from PIL import Image
 from torchvision.datasets.utils import download_url, check_integrity
 
-DATASET_YEAR_DICT = {
-    '2012': {
-        'url': 'http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar',
-        'filename': 'VOCtrainval_11-May-2012.tar',
-        'md5': '6cd6e144f989b92b3379bac3b3de84fd',
-        'base_dir': 'VOCdevkit/VOC2012'
-    },
-    '2011': {
-        'url': 'http://host.robots.ox.ac.uk/pascal/VOC/voc2011/VOCtrainval_25-May-2011.tar',
-        'filename': 'VOCtrainval_25-May-2011.tar',
-        'md5': '6c3384ef61512963050cb5d687e5bf1e',
-        'base_dir': 'TrainVal/VOCdevkit/VOC2011'
-    },
-    '2010': {
-        'url': 'http://host.robots.ox.ac.uk/pascal/VOC/voc2010/VOCtrainval_03-May-2010.tar',
-        'filename': 'VOCtrainval_03-May-2010.tar',
-        'md5': 'da459979d0c395079b5c75ee67908abb',
-        'base_dir': 'VOCdevkit/VOC2010'
-    },
-    '2009': {
-        'url': 'http://host.robots.ox.ac.uk/pascal/VOC/voc2009/VOCtrainval_11-May-2009.tar',
-        'filename': 'VOCtrainval_11-May-2009.tar',
-        'md5': '59065e4b188729180974ef6572f6a212',
-        'base_dir': 'VOCdevkit/VOC2009'
-    },
-    '2008': {
-        'url': 'http://host.robots.ox.ac.uk/pascal/VOC/voc2008/VOCtrainval_14-Jul-2008.tar',
-        'filename': 'VOCtrainval_11-May-2012.tar',
-        'md5': '2629fa636546599198acfcfbfcf1904a',
-        'base_dir': 'VOCdevkit/VOC2008'
-    },
-    '2007': {
-        'url': 'http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar',
-        'filename': 'VOCtrainval_06-Nov-2007.tar',
-        'md5': 'c52e279531787c972589f7e41ab4ae64',
-        'base_dir': 'VOCdevkit/VOC2007'
-    }
-}
-
 
 def voc_cmap(N=256, normalized=False):
     def bitget(byteval, idx):
@@ -70,24 +31,11 @@ def voc_cmap(N=256, normalized=False):
     return cmap
 
 
-class VOCSegmentation(data.Dataset):
-    """`Pascal VOC <http://host.robots.ox.ac.uk/pascal/VOC/>`_ Segmentation Dataset.
-    Args:
-        root (string): Root directory of the VOC Dataset.
-        year (string, optional): The dataset year, supports years 2007 to 2012.
-        image_set (string, optional): Select the image_set to use, ``train``, ``trainval`` or ``val``
-        download (bool, optional): If true, downloads the dataset from the internet and
-            puts it in root directory. If dataset is already downloaded, it is not
-            downloaded again.
-        transform (callable, optional): A function/transform that  takes in an PIL image
-            and returns a transformed version. E.g, ``transforms.RandomCrop``
-    """
-    cmap = voc_cmap()
+class Mapillary(data.Dataset):
 
     def __init__(self,
                  root,
-                 year='2012',
-                 image_set='train',
+                 label_map,
                  download=False,
                  transform=None):
 
@@ -97,70 +45,106 @@ class VOCSegmentation(data.Dataset):
             year = '2012'
 
         self.root = os.path.expanduser(root)
-        self.year = year
-        self.url = DATASET_YEAR_DICT[year]['url']
-        self.filename = DATASET_YEAR_DICT[year]['filename']
-        self.md5 = DATASET_YEAR_DICT[year]['md5']
+        label_map_yaml = open(label_map)
+        parsed_label_mapping_yaml_file = yaml.load(label_map_yaml, Loader=yaml.FullLoader)
+        self.label_mapping = parsed_label_mapping_yaml_file["label_mapping"]
+
         self.transform = transform
 
         self.image_set = image_set
-        base_dir = DATASET_YEAR_DICT[year]['base_dir']
-        voc_root = os.path.join(self.root, base_dir)
-        image_dir = os.path.join(voc_root, 'JPEGImages')
+        #base_dir = DATASET_YEAR_DICT[year]['base_dir']
+        #voc_root = os.path.join(self.root, base_dir)
+        #image_dir = os.path.join(voc_root, 'JPEGImages')
 
-        if download:
-            download_extract(self.url, self.root, self.filename, self.md5)
-
-        if not os.path.isdir(voc_root):
-            raise RuntimeError('Dataset not found or corrupted.' +
-                               ' You can use download=True to download it')
-
-        if is_aug and image_set == 'train':
-            mask_dir = os.path.join(voc_root, 'SegmentationClassAug')
-            assert os.path.exists(
-                mask_dir), "SegmentationClassAug not found, please refer to README.md and prepare it manually"
-            split_f = os.path.join(self.root, 'train_aug.txt')  # './datasets/data/train_aug.txt'
-        else:
-            mask_dir = os.path.join(voc_root, 'SegmentationClass')
-            splits_dir = os.path.join(voc_root, 'ImageSets/Segmentation')
-            split_f = os.path.join(splits_dir, image_set.rstrip('\n') + '.txt')
-
-        if not os.path.exists(split_f):
-            raise ValueError(
-                'Wrong image_set entered! Please use image_set="train" '
-                'or image_set="trainval" or image_set="val"')
-
-        with open(os.path.join(split_f), "r") as f:
-            file_names = [x.strip() for x in f.readlines()]
-
-        self.images = [os.path.join(image_dir, x + ".jpg") for x in file_names]
-        self.masks = [os.path.join(mask_dir, x + ".png") for x in file_names]
-        assert (len(self.images) == len(self.masks))
-
-    def __getitem__(self, index):
-        """
-        Args:
-            index (int): Index
-        Returns:
-            tuple: (image, target) where target is the image segmentation.
-        """
-        img = Image.open(self.images[index]).convert('RGB')
-        target = Image.open(self.masks[index])
-        if self.transform is not None:
-            img, target = self.transform(img, target)
-
-        return img, target
-
+        for file_path in glob.glob(osp.join(root, 'images/*.jpg')):
+            filename = osp.basename(file_path).split('.')[0]
+            img_file = file_path
+            label_file = osp.join(root, 'instances', filename + '.png')
+            self.files.append({
+                "img": img_file
+                "label": label_file
+            })
     def __len__(self):
-        return len(self.images)
+        return len(self.files)
 
-    @classmethod
-    def decode_target(cls, mask):
-        """decode semantic mask to RGB image"""
-        return cls.cmap[mask]
+    def __getitem__(self,index):
+        datafiles = self.files[index]
+        image = cv2.imread(datafiles["img"], cv2.IMREAD_COLOR)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        instance = cv2.imread(datafiles["label"], -1)
+        label = instance/256
+        label = np.uint8(label)
+        sample = {"image": image, "label": label}
+
+        if self.training:
+            return self.transforms_tr(sample)
+        else:
+            return self.transforms_valid(sample)
+
+    def transforms_tr(self, sample):
+        prob_augmentation = random.random()
+        if prob_augmentation > 0.1:
+            augmentation_strength = int(np.random.uniform(10,30))
+            if sample['image'].shape[0] < 360 or sample['image'].shape[1] < 480:
+                composed_transforms = transforms.Compose([tr.Resize((360,480)),
+                                                          tr.RandAugment(3, augmentation_strength),
+                                                          tr.LabelMapping(self.label_mapping),
+                                                          tr.ToTensor()])
+            else:
+                composed_transforms = transforms. Compose([tr.RandomCrop((360,480)),
+                                                           tr.RandAugment(3, augmentation_strength),
+                                                           tr.LabelMapping(self.label_mapping),
+                                                           tr.ToTensor()])
+        else:
+            composed_transforms = transforms.Compose([tr.RandomCrop((360,480)),
+                                                      tr.LabelMapping(self.label_mapping),
+                                                      tr.ToTensor()])
+        return composed_transforms(sample)
 
 
-def download_extract(url, root, filename, md5):
-    download_url(url, root, filename, md5)
-    with tarfile.open(os.path.join(root, filename), "r") as tar:
-        tar.extractall(path=root)
+    def transforms_valid(self,sample):
+        composed_transforms = transforms.Compose([tr.Resize((360,480)),
+                                                  tr.LabelMapping(self.label_mapping),
+                                                  tr.ToTensor()])
+        return composed_transforms(sample)
+
+
+if __name__ = "__main2__":
+
+    from torch.utils.data import DataLoader
+    from torchvision import transforms
+    import matplotlib.pyplot as plt
+    import argparse
+    import os
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-dir", type = str, help = "Path to the directory containing dataset")
+    parser.add_argument("--label-mapping-config", type = str, help = "path to label mapping config yaml")
+
+    args = parser.parse_args()
+
+    train_dataset = Mapillary(osp.join(args.data_dir, 'training'), args.label_mapping_config)
+    trainloader = data.DataLoader(train_dataset, shuffle='True', batch_size=1,num_workers=4,pin_memory=True)
+
+    cv2.namedWindow("image")
+
+    trainloader_enu = enumerate(trainloader)
+
+    for step in range(10):
+
+        batch = next(trainloader_enu)
+
+        index, sample = batch
+        label = sample["label"]
+        image = sample["image"]
+
+
+
+        image = np.array(image[0]).astype(np.uint8)
+        label = np.array(label[0]).astype(np.uint8)
+
+        image = image.transpose((1,2,0))
+
+        cv2.imshow("image", image)
+
+        cv2.waitKey()

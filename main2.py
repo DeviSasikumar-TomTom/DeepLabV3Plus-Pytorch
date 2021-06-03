@@ -5,6 +5,7 @@ import os
 import random
 import argparse
 import numpy as np
+import transformations as tr
 
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
@@ -126,50 +127,32 @@ def get_dataset(opts):
         val_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
                                   image_set='val', download=False, transform=val_transform)
     if opts.dataset == 'mapillary':
-        train_transform = et.ExtCompose([
-            # et.ExtResize( 512 ),
-            et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size)),
-            et.ExtColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
-            et.ExtRandomHorizontalFlip(),
-            et.ExtToTensor(),
-            et.ExtNormalize(mean=[0.485, 0.456, 0.406],
+        prob_augmentation = random.random()
+        if prob_augmentation > 0.1:
+            augmentation_strength = int(np.random.uniform(10,30))
+            train_transform = tr.Compose([
+                tr.Resize( (360, 480)),
+                #et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size)),
+                #et.ExtColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
+                tr.RandAugment(3, augmentation_strength),
+                #tr.LabelMapping(self.label_mapping)
+                tr.ToTensor(),
+                tr.Normalize(mean=[0.485, 0.456, 0.406],
                             std=[0.229, 0.224, 0.225]),
         ])
 
-        val_transform = et.ExtCompose([
-            # et.ExtResize( 512 ),
-            et.ExtToTensor(),
-            et.ExtNormalize(mean=[0.485, 0.456, 0.406],
+        val_transform = tr.Compose([
+            tr.Resize(360, 480 ),
+            tr.ToTensor(),
+            et.Normalize(mean=[0.485, 0.456, 0.406],
                             std=[0.229, 0.224, 0.225]),
         ])
 
-        train_dst = MVD(root=opts.data_root, args.label_mapping_config, training=True)
-        val_dst = MVD(root=opts.data_root,transform=val_transform)
+        train_dst = voc1.Mapillary(root=opts.data_root, label_map=args.label_mapping_config, training=True)
+        val_dst = voc1.Mapillary(root=opts.data_root,label_map=args.label_mapping_config, training=False)
     return train_dst, val_dst
 
-    if opts.dataset == 'cityscapes':
-        train_transform = et.ExtCompose([
-            # et.ExtResize( 512 ),
-            et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size)),
-            et.ExtColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
-            et.ExtRandomHorizontalFlip(),
-            et.ExtToTensor(),
-            et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-                            std=[0.229, 0.224, 0.225]),
-        ])
 
-        val_transform = et.ExtCompose([
-            # et.ExtResize( 512 ),
-            et.ExtToTensor(),
-            et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-                            std=[0.229, 0.224, 0.225]),
-        ])
-
-        train_dst = Cityscapes(root=opts.data_root,
-                               split='train', transform=train_transform)
-        val_dst = Cityscapes(root=opts.data_root,
-                             split='val', transform=val_transform)
-    return train_dst, val_dst
 
 
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
