@@ -94,7 +94,7 @@ class MVD():
     import matplotlib.pyplot as plt
     #import argparse
     import os
-
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-dir", type=str,
                         help="Path to the directory containing the PASCAL VOC dataset.")
