@@ -94,15 +94,15 @@ class MVD():
     import matplotlib.pyplot as plt
     #import argparse
     import os
-if __name__ == "__main__":
+if __name__ == "__mapillary_load__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", type=str,
+    parser.add_argument("--data-dir", type=str, default='./datasets/data/Mapillary/',
                         help="Path to the directory containing the PASCAL VOC dataset.")
-    parser.add_argument("--label-mapping-config", type=str,
+    parser.add_argument("--label-mapping-config", type=str, default='./datasets/data/label_mapping_config.yaml',
                         help="Path to the label mapping config yaml")
 
     args = parser.parse_args()
-    train_dataset = MVD(osp.join(args.data_dir, 'training'), args.label_mapping_config)
+    train_dataset = MVD(osp.join(args.data-dir, 'training'), args.label_mapping_config)
     trainloader = data.DataLoader(train_dataset, shuffle=True, batch_size=1,
                                   num_workers=4, pin_memory=True)
     cv2.namedWindow("image")
@@ -130,4 +130,4 @@ if __name__ == "__main__":
         cv2.imshow("image", image)
         # # cv2.imshow("labels", label)
         #
-        cv2.waitKey()
+        cv2.waitKey(1500)

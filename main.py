@@ -5,11 +5,13 @@ import os
 import random
 import argparse
 import numpy as np
-
+import transformations as tr
+import torchvision.transforms as transforms
 from torch.utils import data
 from datasets import VOCSegmentation, Cityscapes
 from utils import ext_transforms as et
 from metrics import StreamSegMetrics
+from datasets import voc1
 
 import torch
 import torch.nn as nn
@@ -18,22 +20,27 @@ from utils.visualizer import Visualizer
 from PIL import Image
 import matplotlib
 import matplotlib.pyplot as plt
+import os.path as osp
+
 
 
 def get_argparser():
     parser = argparse.ArgumentParser()
 
     # Datset Options
-    parser.add_argument("--data_root", type=str, default='./datasets/data',
+    parser.add_argument("--data_root", type=str, default='./datasets/data/Mapillary/',
                         help="path to Dataset")
-    parser.add_argument("--dataset", type=str, default='voc',
+    parser.add_argument("--label_map", type=str, default='./datasets/data/label_mapping_config.yaml', help="path to label mapping config file")
+    parser.add_argument("--dataset", type=str, default='mapillary',
                         choices=['voc', 'cityscapes', 'mapillary'], help='Name of dataset')
     parser.add_argument("--num_classes", type=int, default=None,
                         help="num classes (default: None)")
 
+    #parser.add_argument("--label-mapping-config", type=str, default=False, help="path to label mapping config yaml")
+
     # Deeplab Options
     parser.add_argument("--model", type=str, default='deeplabv3plus_resnet50',
-                        choices=['deeplabv3_resnet50',  'deeplabv3plus_resnet50',
+                        choices=['deeplabv3_resnet50', 'deeplabv3plus_resnet50',
                                  'deeplabv3_resnet101', 'deeplabv3plus_resnet101',
                                  'deeplabv3_mobilenet', 'deeplabv3plus_mobilenet'], help='model name')
     parser.add_argument("--separable_conv", action='store_true', default=False,
@@ -58,7 +65,7 @@ def get_argparser():
     parser.add_argument("--val_batch_size", type=int, default=4,
                         help='batch size for validation (default: 4)')
     parser.add_argument("--crop_size", type=int, default=513)
-    
+
     parser.add_argument("--ckpt", default=None, type=str,
                         help="restore from checkpoint")
     parser.add_argument("--continue_training", action='store_true', default=False)
@@ -99,7 +106,7 @@ def get_dataset(opts):
     """
     if opts.dataset == 'voc':
         train_transform = et.ExtCompose([
-            #et.ExtResize(size=opts.crop_size),
+            # et.ExtResize(size=opts.crop_size),
             et.ExtRandomScale((0.5, 2.0)),
             et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size), pad_if_needed=True),
             et.ExtRandomHorizontalFlip(),
@@ -121,34 +128,38 @@ def get_dataset(opts):
                 et.ExtNormalize(mean=[0.485, 0.456, 0.406],
                                 std=[0.229, 0.224, 0.225]),
             ])
-        train_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
-                                    image_set='train', download=opts.download, transform=train_transform)
-        val_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
-                                  image_set='val', download=False, transform=val_transform)
+        # train_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
+        #                             image_set='train', download=opts.download, transform=train_transform)
+        # val_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
+        #                           image_set='val', download=False, transform=val_transform)
+    if opts.dataset == 'mapillary':
 
-    if opts.dataset == 'cityscapes':
-        train_transform = et.ExtCompose([
-            #et.ExtResize( 512 ),
-            et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size)),
-            et.ExtColorJitter( brightness=0.5, contrast=0.5, saturation=0.5 ),
-            et.ExtRandomHorizontalFlip(),
-            et.ExtToTensor(),
-            et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-                            std=[0.229, 0.224, 0.225]),
-        ])
+       # train_transform = et.ExtCompose([
+       #          et.ExtResize( (360, 480)),
+       #          #et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size)),
+       #          et.ExtColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
+       #          #tr.RandAugment(3, augmentation_strength),
+       #           #tr.LabelMapping(self.label_mapping)
+       #          et.ExtToTensor(),
+       #          et.ExtNormalize(mean=[0.485, 0.456, 0.406],
+       #                  std=[0.229, 0.224, 0.225])
+       #  ])
+       # #
+       # val_transform = et.ExtCompose([
+       #        tr.Resize(360, 480 ),
+       #        et.ExtToTensor(),
+       #        et.ExtNormalize(mean=[0.485, 0.456, 0.406],
+       #                       std=[0.229, 0.224, 0.225])
+       # ])
+       parser = argparse.ArgumentParser()
+       args = parser.parse_args()
 
-        val_transform = et.ExtCompose([
-            #et.ExtResize( 512 ),
-            et.ExtToTensor(),
-            et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-                            std=[0.229, 0.224, 0.225]),
-        ])
+       train_dst = voc1.Mapillary(root= osp.join(opts.data_root, 'training'), label_map=opts.label_map, training=True) #transform = train_transform)
+       val_dst = voc1.Mapillary(root=osp.join(opts.data_root, 'validation'), label_map=opts.label_map, training=False)#transform = val_transform)
 
-        train_dst = Cityscapes(root=opts.data_root,
-                               split='train', transform=train_transform)
-        val_dst = Cityscapes(root=opts.data_root,
-                             split='val', transform=val_transform)
-    return train_dst, val_dst
+
+
+
 
 
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
@@ -158,13 +169,13 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     if opts.save_val_results:
         if not os.path.exists('results'):
             os.mkdir('results')
-        denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], 
+        denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406],
                                    std=[0.229, 0.224, 0.225])
         img_id = 0
 
     with torch.no_grad():
         for i, (images, labels) in tqdm(enumerate(loader)):
-            
+
             images = images.to(device, dtype=torch.float32)
             labels = labels.to(device, dtype=torch.long)
 
@@ -208,10 +219,12 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
 
 def main():
     opts = get_argparser().parse_args()
-    if opts.dataset.lower() == 'voc':
-        opts.num_classes = 21
+    if opts.dataset.lower() == 'mapillary':
+        opts.num_classes = 150
     elif opts.dataset.lower() == 'cityscapes':
         opts.num_classes = 19
+    elif opts.dataset.lower() == 'voc':
+        opts.num_classes = 21
 
     # Setup visualization
     vis = Visualizer(port=opts.vis_port,
@@ -229,16 +242,26 @@ def main():
     random.seed(opts.random_seed)
 
     # Setup dataloader
-    if opts.dataset=='voc' and not opts.crop_val:
+    # if opts.dataset == 'voc' and not opts.crop_val:
+    #     opts.val_batch_size = 1
+    #
+    # train_dst, val_dst = get_dataset(opts)
+    # train_loader = data.DataLoader(
+    #     train_dst, batch_size=opts.batch_size, shuffle=True, num_workers=2)
+    # val_loader = data.DataLoader(
+    #     val_dst, batch_size=opts.val_batch_size, shuffle=True, num_workers=2)
+    # print("Dataset: %s, Train set: %d, Val set: %d" %
+    #       (opts.dataset, len(train_dst), len(val_dst)))
+
+    if opts.dataset == 'mapillary' and not opts.crop_val:
         opts.val_batch_size = 1
-    
-    train_dst, val_dst = get_dataset(opts)
-    train_loader = data.DataLoader(
-        train_dst, batch_size=opts.batch_size, shuffle=True, num_workers=2)
-    val_loader = data.DataLoader(
-        val_dst, batch_size=opts.val_batch_size, shuffle=True, num_workers=2)
-    print("Dataset: %s, Train set: %d, Val set: %d" %
-          (opts.dataset, len(train_dst), len(val_dst)))
+
+    train_dst,val_dst = get_dataset(opts)
+    train_loader = data.DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=2)
+    val_loader = data.DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=2)
+
+    print("Dataset: %s, Train set: %d, Val set: %d" %(opts.dataset, len(train_dst), len(val_dst)))
+
 
     # Set up model
     model_map = {
@@ -254,24 +277,24 @@ def main():
     if opts.separable_conv and 'plus' in opts.model:
         network.convert_to_separable_conv(model.classifier)
     utils.set_bn_momentum(model.backbone, momentum=0.01)
-    
+
     # Set up metrics
     metrics = StreamSegMetrics(opts.num_classes)
 
     # Set up optimizer
     optimizer = torch.optim.SGD(params=[
-        {'params': model.backbone.parameters(), 'lr': 0.1*opts.lr},
+        {'params': model.backbone.parameters(), 'lr': 0.1 * opts.lr},
         {'params': model.classifier.parameters(), 'lr': opts.lr},
     ], lr=opts.lr, momentum=0.9, weight_decay=opts.weight_decay)
-    #optimizer = torch.optim.SGD(params=model.parameters(), lr=opts.lr, momentum=0.9, weight_decay=opts.weight_decay)
-    #torch.optim.lr_scheduler.StepLR(optimizer, step_size=opts.lr_decay_step, gamma=opts.lr_decay_factor)
-    if opts.lr_policy=='poly':
+    # optimizer = torch.optim.SGD(params=model.parameters(), lr=opts.lr, momentum=0.9, weight_decay=opts.weight_decay)
+    # torch.optim.lr_scheduler.StepLR(optimizer, step_size=opts.lr_decay_step, gamma=opts.lr_decay_factor)
+    if opts.lr_policy == 'poly':
         scheduler = utils.PolyLR(optimizer, opts.total_itrs, power=0.9)
-    elif opts.lr_policy=='step':
+    elif opts.lr_policy == 'step':
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=opts.step_size, gamma=0.1)
 
     # Set up criterion
-    #criterion = utils.get_loss(opts.loss_type)
+    # criterion = utils.get_loss(opts.loss_type)
     if opts.loss_type == 'focal_loss':
         criterion = utils.FocalLoss(ignore_index=255, size_average=True)
     elif opts.loss_type == 'cross_entropy':
@@ -288,7 +311,7 @@ def main():
             "best_score": best_score,
         }, path)
         print("Model saved as %s" % path)
-    
+
     utils.mkdir('checkpoints')
     # Restore
     best_score = 0.0
@@ -313,7 +336,7 @@ def main():
         model = nn.DataParallel(model)
         model.to(device)
 
-    #==========   Train Loop   ==========#
+    # ==========   Train Loop   ==========#
     vis_sample_id = np.random.randint(0, len(val_loader), opts.vis_num_samples,
                                       np.int32) if opts.enable_vis else None  # sample idxs for visualization
     denorm = utils.Denormalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # denormalization for ori images
@@ -326,7 +349,7 @@ def main():
         return
 
     interval_loss = 0
-    while True: #cur_itrs < opts.total_itrs:
+    while True:  # cur_itrs < opts.total_itrs:
         # =====  Train  =====
         model.train()
         cur_epochs += 1
@@ -348,7 +371,7 @@ def main():
                 vis.vis_scalar('Loss', cur_itrs, np_loss)
 
             if (cur_itrs) % 10 == 0:
-                interval_loss = interval_loss/10
+                interval_loss = interval_loss / 10
                 print("Epoch %d, Itrs %d/%d, Loss=%f" %
                       (cur_epochs, cur_itrs, opts.total_itrs, interval_loss))
                 interval_loss = 0.0
@@ -359,12 +382,13 @@ def main():
                 print("validation...")
                 model.eval()
                 val_score, ret_samples = validate(
-                    opts=opts, model=model, loader=val_loader, device=device, metrics=metrics, ret_samples_ids=vis_sample_id)
+                    opts=opts, model=model, loader=val_loader, device=device, metrics=metrics,
+                    ret_samples_ids=vis_sample_id)
                 print(metrics.to_str(val_score))
                 if val_score['Mean IoU'] > best_score:  # save best model
                     best_score = val_score['Mean IoU']
                     save_ckpt('checkpoints/best_%s_%s_os%d.pth' %
-                              (opts.model, opts.dataset,opts.output_stride))
+                              (opts.model, opts.dataset, opts.output_stride))
 
                 if vis is not None:  # visualize validation score and samples
                     vis.vis_scalar("[Val] Overall Acc", cur_itrs, val_score['Overall Acc'])
@@ -378,11 +402,11 @@ def main():
                         concat_img = np.concatenate((img, target, lbl), axis=2)  # concat along width
                         vis.vis_image('Sample %d' % k, concat_img)
                 model.train()
-            scheduler.step()  
+            scheduler.step()
 
-            if cur_itrs >=  opts.total_itrs:
+            if cur_itrs >= opts.total_itrs:
                 return
 
-        
+
 if __name__ == '__main__':
     main()
