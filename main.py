@@ -8,6 +8,7 @@ import numpy as np
 import transformations as tr
 import torchvision.transforms as transforms
 from torch.utils import data
+from datasets import Mapillary
 from datasets import VOCSegmentation, Cityscapes
 from utils import ext_transforms as et
 from metrics import StreamSegMetrics
@@ -134,33 +135,29 @@ def get_dataset(opts):
         #                           image_set='val', download=False, transform=val_transform)
     if opts.dataset == 'mapillary':
 
-       # train_transform = et.ExtCompose([
-       #          et.ExtResize( (360, 480)),
-       #          #et.ExtRandomCrop(size=(opts.crop_size, opts.crop_size)),
-       #          et.ExtColorJitter(brightness=0.5, contrast=0.5, saturation=0.5),
-       #          #tr.RandAugment(3, augmentation_strength),
-       #           #tr.LabelMapping(self.label_mapping)
-       #          et.ExtToTensor(),
-       #          et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-       #                  std=[0.229, 0.224, 0.225])
-       #  ])
-       # #
-       # val_transform = et.ExtCompose([
-       #        tr.Resize(360, 480 ),
-       #        et.ExtToTensor(),
-       #        et.ExtNormalize(mean=[0.485, 0.456, 0.406],
-       #                       std=[0.229, 0.224, 0.225])
-       # ])
+       train_transform = transforms. Compose([transforms.Resize((360,480)),
+                                              transforms.RandomHorizontalFlip(),
+                                              #transforms.ToTensor(),
+                                              transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225]),
+                                              transforms.ToTensor(),
+
+       ])
+
+       val_transform = transforms.Compose([transforms.Resize((360, 480)),
+                                             #transforms.ToTensor(),
+                                             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                                             transforms.ToTensor()
+                                             ])
        parser = argparse.ArgumentParser()
        args = parser.parse_args()
 
-       train_dst = voc1.Mapillary(root= osp.join(opts.data_root, 'training'), label_map=opts.label_map, training=True) #transform = train_transform)
-       val_dst = voc1.Mapillary(root=osp.join(opts.data_root, 'validation'), label_map=opts.label_map, training=False)#transform = val_transform)
+       train_dst = Mapillary(root= osp.join(opts.data_root, 'training'), label_map=opts.label_map, training=True, transform =train_transform)
+       val_dst = Mapillary(root=osp.join(opts.data_root, 'validation'), label_map=opts.label_map, training=False, transform = val_transform)
 
 
 
 
-
+    return train_dst, val_dst
 
 def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
     """Do validation and return specified samples"""
@@ -257,8 +254,8 @@ def main():
         opts.val_batch_size = 1
 
     train_dst,val_dst = get_dataset(opts)
-    train_loader = data.DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=2)
-    val_loader = data.DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=2)
+    train_loader = data.DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=1)
+    val_loader = data.DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=1)
 
     print("Dataset: %s, Train set: %d, Val set: %d" %(opts.dataset, len(train_dst), len(val_dst)))
 
