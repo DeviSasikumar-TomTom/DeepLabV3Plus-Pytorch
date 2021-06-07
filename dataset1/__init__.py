@@ -1,5 +1,5 @@
 from .cityscapes import Cityscapes
 from .My_mapillary_loader import Mapillary
-from .transformations import RandAugment
-from .transformations import RandomCrop
+from .transformations1 import RandAugment
+from .transformations1 import RandomCrop
 from .My_mapillary_loader import Mapillary
