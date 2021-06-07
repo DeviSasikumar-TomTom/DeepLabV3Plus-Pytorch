@@ -6,8 +6,9 @@ import os.path as osp
 import random
 import numpy as np
 import utils
-import transformations as tr
-import torchvision.transforms as transform
+import transformations
+#import transformations as tr
+import torchvision.transforms as transforms
 
 
 
@@ -83,12 +84,12 @@ class Mapillary(data.Dataset):
                                                           tr.LabelMapping(self.label_mapping), tr.ToTensor()])
 
             else:
-                composed_transforms = transforms.Compose([tr.RandomCrop((360, 480)),
+                composed_transforms = transforms.Compose([transformations.RandomCrop((360, 480)),
                                                           tr.RandAugment(3, augmentation_strength),
                                                           tr.LabelMapping(self.label_mapping),
                                                           tr.ToTensor()])
         else:
-            composed_transforms = transforms.Compose([transforms.RandomCrop((360, 480)),
+            composed_transforms = transforms.Compose([tr.RandomCrop((360, 480)),
                                                       tr.LabelMapping(self.label_mapping),
                                                       tr.ToTensor()])
         return composed_transforms(sample)
