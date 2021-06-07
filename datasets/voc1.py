@@ -6,9 +6,8 @@ import os.path as osp
 import random
 import numpy as np
 import utils
-#import transformations as tr
-import torchvision.transforms as transforms
-import transformations as tr
+from utils.transformations import transformations as tr
+import torchvision.transforms as transform
 
 
 
