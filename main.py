@@ -59,9 +59,9 @@ def get_argparser():
     parser.add_argument("--step_size", type=int, default=10000)
     parser.add_argument("--crop_val", action='store_true', default=False,
                         help='crop validation (default: False)')
-    parser.add_argument("--batch_size", type=int, default=16,
+    parser.add_argument("--batch_size", type=int, default=20,
                         help='batch size (default: 16)')
-    parser.add_argument("--val_batch_size", type=int, default=4,
+    parser.add_argument("--val_batch_size", type=int, default=20,
                         help='batch size for validation (default: 4)')
     parser.add_argument("--crop_size", type=int, default=513)
 
@@ -348,10 +348,10 @@ def main():
         # =====  Train  =====
         model.train()
         cur_epochs += 1
-        for (images, labels) in train_loader:
+        for (img_file, label_file) in train_loader:
             cur_itrs += 1
 
-            images = images.to(device, dtype=torch.float32)
+            images = img_file.to(device, dtype=torch.float32)
             labels = labels.to(device, dtype=torch.long)
 
             optimizer.zero_grad()
