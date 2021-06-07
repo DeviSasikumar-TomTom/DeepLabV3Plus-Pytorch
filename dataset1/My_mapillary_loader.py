@@ -6,8 +6,8 @@ import os.path as osp
 import random
 import numpy as np
 import utils
-import transformations1
-from transformations1 import RandomCrop
+#import transformations1
+#from transformations1 import RandomCrop
 #import transformations1 as tr
 import torchvision.transforms as transforms
 import sys
@@ -16,6 +16,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 sys.path.append("./")
 import transformations1 as tr
+from .transformations1 import RandomCrop
 
 
 
