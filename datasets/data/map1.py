@@ -2,12 +2,8 @@ import os.path as osp
 import numpy as np
 import random
 #import matplotlib.pyplot as plt
-import collections
-import torch
-import torchvision.transforms as transforms
 import cv2
 from torch.utils import data
-from PIL import Image
 import glob
 import yaml
 import sys
@@ -90,7 +86,6 @@ if __name__ == "__main__":
     # from dataloaders.utils import decode_segmap
     from torch.utils.data import DataLoader
     from torchvision import transforms
-    import matplotlib.pyplot as plt
     import argparse
     import os
 

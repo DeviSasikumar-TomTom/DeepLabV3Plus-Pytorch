@@ -1,23 +1,12 @@
-import os
-import sys
-import tarfile
-import collections
 import torch.utils.data as data
 import cv2
 import yaml
 import glob
 import os.path as osp
-import os
 import random
-import shutil
 import numpy as np
 import transformations as tr
-import torchvision.transforms as transforms
-import transformations as tr
-from PIL import Image
-
-from PIL import Image
-from torchvision.datasets.utils import download_url, check_integrity
+from data import transformations as tr
 
 
 class Mapillary(data.Dataset):
@@ -26,7 +15,7 @@ class Mapillary(data.Dataset):
                  root,
                  label_map,
                  download=False,
-                 training=True, transforms=None):
+                 training=True):
 
         self.root = root
         self.training = training
@@ -37,13 +26,6 @@ class Mapillary(data.Dataset):
         parsed_label_mapping_yaml_file = yaml.load(label_map_yaml, Loader=yaml.FullLoader)
         self.label_mapping = parsed_label_mapping_yaml_file["label_mapping"]
 
-        self.transforms = transforms
-       # self.val_transform = val_transform
-        #self.train_transform = train_transform
-        # self.image_set = image_set
-        # base_dir = DATASET_YEAR_DICT[year]['base_dir']
-        # voc_root = os.path.join(self.root, base_dir)
-        # image_dir = os.path.join(voc_root, 'JPEGImages')
 
         for file_path in glob.glob(osp.join(root, 'images/*.jpg')):
             filename = osp.basename(file_path).split('.')[0]
@@ -57,46 +39,29 @@ class Mapillary(data.Dataset):
 
 
             self.label_file.append(label_file)
-            #filenames =[]
-            #filenames = filenames.append({"img": img_file, "label": label_file })
 
-            #label_file = osp.join(root, 'instances', filename + '.png')
-
-            #self.img_file = list(filenames.values())
             self.files.append({
                 "img": img_file,
                  "label": label_file
                })
 
-    # def __len__(self):
-    #     return len(self.files)
+    def __len__(self):
+        return len(self.files)
 
     def __getitem__(self, index):
         datafiles = self.files[index]
         image = cv2.imread(datafiles["img"], cv2.IMREAD_COLOR)
-        #image = cv2.imread(datafiles, cv2.IMREAD_COLOR)
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         instance = cv2.imread(datafiles["label"], -1)
-        #instance = cv2.imread(datafiles["label"], -1)
-        #label = cv2.imread(datafiles["label"], cv2.IMREAD_COLOR)
-        # image = cv2.imread(datafiles, cv2.IMREAD_COLOR)
-        #label = cv2.cvtColor(label, cv2.COLOR_BGR2RGB)
-
-
-        #datafiles1 = self.label_file[index]
-        #instance =Image.open(datafiles["label"])
-
         label = instance / 256
         label = np.uint8(label)
         sample = {"image": image, "label": label}
-        #sample = [image,label]
-        #sample = {image,label}
-        image1 = Image.open(self.img_file[index]).convert('RGB')
-        label1 = Image.open(self.label_file[index])
+
+       #image1 = Image.open(self.img_file[index]).convert('RGB')
+       #label1 = Image.open(self.label_file[index])
 
         if self.training:
-            return self.train_transform(sample)
-           #image1,label1 = self.transforms_tr(image1,label1)
+            return self.transforms_tr(sample)
         else:
             return self.transforms_valid(sample)
 
@@ -136,9 +101,7 @@ if __name__ == "__main__":
 
     from torch.utils.data import DataLoader
     from torchvision import transforms
-    import matplotlib.pyplot as plt
     import argparse
-    import os
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--data-dir", type = str, help = "Path to the directory containing dataset")

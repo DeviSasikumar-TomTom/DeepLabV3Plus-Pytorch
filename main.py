@@ -151,8 +151,8 @@ def get_dataset(opts):
        parser = argparse.ArgumentParser()
        args = parser.parse_args()
 
-       train_dst = Mapillary(root= osp.join(opts.data_root, 'training'), label_map=opts.label_map, training=True, transforms =train_transform)
-       val_dst = Mapillary(root=osp.join(opts.data_root, 'validation'), label_map=opts.label_map, training=False, transforms = val_transform)
+       train_dst = Mapillary(root= osp.join(opts.data_root, 'training'), label_map=opts.label_map, training=True)
+       val_dst = Mapillary(root=osp.join(opts.data_root, 'validation'), label_map=opts.label_map, training=False)
 
 
 
