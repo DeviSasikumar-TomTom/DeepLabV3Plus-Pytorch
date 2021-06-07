@@ -7,8 +7,8 @@ import argparse
 import numpy as np
 import torchvision.transforms as transforms
 from torch.utils import data
-#from dataset1 import Mapillary
-from mapillary_load import Mapillary
+from dataset1 import Mapillary
+#from mapillary_load import Mapillary
 from utils import ext_transforms as et
 from metrics import StreamSegMetrics
 
