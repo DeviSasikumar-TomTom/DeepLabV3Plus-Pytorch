@@ -12,7 +12,7 @@ import torchvision.transforms as transforms
 
 
 
-class Mapillary(data.Dataset):
+class Mapillary(data.dataset1):
 
     def __init__(self,
                  root,
@@ -84,7 +84,7 @@ class Mapillary(data.Dataset):
                                                           tr.LabelMapping(self.label_mapping), tr.ToTensor()])
 
             else:
-                composed_transforms = transforms.Compose([transformations.RandomCrop((360, 480)),
+                composed_transforms = transforms.Compose([tr.RandomCrop((360, 480)),
                                                           tr.RandAugment(3, augmentation_strength),
                                                           tr.LabelMapping(self.label_mapping),
                                                           tr.ToTensor()])
