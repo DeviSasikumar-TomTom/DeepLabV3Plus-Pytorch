@@ -26,7 +26,7 @@ class Mapillary(data.Dataset):
                  root,
                  label_map,
                  download=False,
-                 training=True, transform=None):
+                 training=True, transforms=None):
 
         self.root = root
         self.training = training
@@ -37,8 +37,9 @@ class Mapillary(data.Dataset):
         parsed_label_mapping_yaml_file = yaml.load(label_map_yaml, Loader=yaml.FullLoader)
         self.label_mapping = parsed_label_mapping_yaml_file["label_mapping"]
 
-        self.transform = transform
-
+        self.transforms = transforms
+       # self.val_transform = val_transform
+        #self.train_transform = train_transform
         # self.image_set = image_set
         # base_dir = DATASET_YEAR_DICT[year]['base_dir']
         # voc_root = os.path.join(self.root, base_dir)
@@ -54,8 +55,7 @@ class Mapillary(data.Dataset):
             filename1 = osp.basename(filepath1).split('.')[0]
             label_file = filepath1
 
-            #label_file = osp.join(root, 'instances', filename1 + '.png')
-            #self.img_file.append(img_file)
+
             self.label_file.append(label_file)
             #filenames =[]
             #filenames = filenames.append({"img": img_file, "label": label_file })
@@ -63,7 +63,6 @@ class Mapillary(data.Dataset):
             #label_file = osp.join(root, 'instances', filename + '.png')
 
             #self.img_file = list(filenames.values())
-            #self.label_file = list()
             self.files.append({
                 "img": img_file,
                  "label": label_file
@@ -79,18 +78,30 @@ class Mapillary(data.Dataset):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         instance = cv2.imread(datafiles["label"], -1)
         #instance = cv2.imread(datafiles["label"], -1)
+        #label = cv2.imread(datafiles["label"], cv2.IMREAD_COLOR)
+        # image = cv2.imread(datafiles, cv2.IMREAD_COLOR)
+        #label = cv2.cvtColor(label, cv2.COLOR_BGR2RGB)
+
+
         #datafiles1 = self.label_file[index]
         #instance =Image.open(datafiles["label"])
-        #instance = Image.open(datafiles1)
+
         label = instance / 256
         label = np.uint8(label)
         sample = {"image": image, "label": label}
+        #sample = [image,label]
+        #sample = {image,label}
+        image1 = Image.open(self.img_file[index]).convert('RGB')
+        label1 = Image.open(self.label_file[index])
 
         if self.training:
-            #return self.transforms_tr(sample)
-            return self.transforms_tr(sample)
+            return self.train_transform(sample)
+           #image1,label1 = self.transforms_tr(image1,label1)
         else:
             return self.transforms_valid(sample)
+
+
+
     def __len__(self):
         return len(self.img_file)
 
@@ -99,15 +110,16 @@ class Mapillary(data.Dataset):
         if prob_augmentation > 0.1:
             augmentation_strength = int(np.random.uniform(10, 30))
             if sample['image'].shape[0] < 360 or sample['image'].shape[1] < 480:
-                composed_transforms = transforms.Compose([tr.Resize((360, 480)),
+
+                 composed_transforms = transforms.Compose([tr.Resize((360, 480)),
+                                                          tr.RandAugment(3, augmentation_strength),
+                                                          tr.LabelMapping(self.label_mapping), tr.ToTensor()])
+
+            else:
+                composed_transforms = transforms.Compose([tr.RandomCrop((360, 480)),
                                                           tr.RandAugment(3, augmentation_strength),
                                                           tr.LabelMapping(self.label_mapping),
                                                           tr.ToTensor()])
-            else:
-                composed_transforms = transforms.Compose([transforms.RandomCrop((360, 480)),
-                                                          #transforms.RandAugment(3, augmentation_strength),
-                                                          #transforms.LabelMapping(self.label_mapping),
-                                                          transforms.ToTensor()])
         else:
             composed_transforms = transforms.Compose([transforms.RandomCrop((360, 480)),
                                                       tr.LabelMapping(self.label_mapping),
