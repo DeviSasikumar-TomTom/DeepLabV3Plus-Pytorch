@@ -7,7 +7,7 @@ import random
 import numpy as np
 import utils
 import transformations1
-from .transformations1 import RandomCrop
+from transformations1 import RandomCrop
 import transformations1 as tr
 import torchvision.transforms as transforms
 
