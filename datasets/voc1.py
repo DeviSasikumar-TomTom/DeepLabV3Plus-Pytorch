@@ -6,7 +6,7 @@ import os.path as osp
 import random
 import numpy as np
 import utils
-from torchvision.utils import transformations as tr
+import transformations as tr
 import torchvision.transforms as transform
 
 
