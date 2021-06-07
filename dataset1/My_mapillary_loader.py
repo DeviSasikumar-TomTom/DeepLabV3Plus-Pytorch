@@ -6,9 +6,7 @@ import os.path as osp
 import random
 import numpy as np
 import utils
-#import transformations1
-#from transformations1 import RandomCrop
-#import transformations1 as tr
+
 import torchvision.transforms as transforms
 import sys
 import os
@@ -57,7 +55,7 @@ class Mapillary():
                })
 
     def __len__(self):
-        return len(self.files)
+        return len(self.img_file)
 
     def __getitem__(self, index):
         datafiles = self.files[index]
@@ -79,7 +77,7 @@ class Mapillary():
 
 
     def __len__(self):
-        return len(self.img_file)
+        return len(self.files)
 
     def transforms_tr(self, sample):
         prob_augmentation = random.random()
@@ -92,7 +90,7 @@ class Mapillary():
                                                           tr.LabelMapping(self.label_mapping), tr.ToTensor()])
 
             else:
-                composed_transforms = transforms.Compose([RandomCrop((360, 480)),
+                composed_transforms = transforms.Compose([tr.RandomCrop((360, 480)),
                                                           tr.RandAugment(3, augmentation_strength),
                                                           tr.LabelMapping(self.label_mapping),
                                                           tr.ToTensor()])
