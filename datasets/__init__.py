@@ -1,3 +1,4 @@
 from .cityscapes import Cityscapes
-from .voc1 import Mapillary
-from .transformations import RandAugment, RandomCrop, Resize, LabelMapping
+from .My_mapillary_loader import Mapillary
+from .transformations import transforms
+from .My_mapillary_loader import Mapillary
