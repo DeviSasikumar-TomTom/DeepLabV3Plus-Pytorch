@@ -1,0 +1,11 @@
+{
+  "camera_make": "Garmin", 
+  "timestamp": "2015-09-16T18:54:32", 
+  "camera_model": "VIRBXE", 
+  "weather": "sunny", 
+  "location": {
+    "lat": 49.21820065, 
+    "lon": -122.94982002111111
+  }, 
+  "compass": 95.10339626179194
+}

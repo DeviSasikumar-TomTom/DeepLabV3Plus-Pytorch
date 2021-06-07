@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 import torchvision.transforms as transforms
 from torch.utils import data
-from datasets import My_map
+from datasets import Map
 from utils import ext_transforms as et
 from metrics import StreamSegMetrics
 

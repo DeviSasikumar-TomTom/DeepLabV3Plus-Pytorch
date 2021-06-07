@@ -1,0 +1,152 @@
+label_mapping:
+    3: 8 # Ambiguous Barrier -> fence
+    80: 18 # Banner -> object
+    8: 8 # Barrier -> fence
+    72: 14 # Beach -> terrain
+    81: 18 # Bench -> object
+    132: 11 # Bicycle -> bike
+    33: 15 # Bicyclist -> rider
+    14: 5 # Bike Lane -> pavement
+    82: 18 # Bike Rack -> object
+    0: 0 # Bird -> unclassified
+    133: 9 # Boat -> vehicle
+    27: 1 # Bridge -> building
+    28: 1 # Building -> building
+    134: 9 # Bus -> vehicle
+    84: 18 # CCTV Camera -> object
+    135: 9 # Car -> vehicle
+    146: 20 # Car Mount -> car-mount
+    136: 9 # Caravan -> vehicle
+    83: 18 # Catch Basin -> object
+    4: 1 # Concrete Block -> building
+    15: 4 # Crosswalk - Plain -> road
+    5: 5 # Curb -> pavement
+    16: 5 # Curb Cut -> pavement
+    17: 4 # Driveway -> road
+    147: 18 # Dynamic -> object
+    148: 19 # Ego Vehicle -> ego-vehicle
+    6: 8 # Fence -> fence
+    85: 18 # Fire Hydrant -> object
+    29: 1 # Garage -> building
+    149: 14 # Ground -> terrain
+    1: 0 # Ground Animal -> unclassified
+    7: 8 # Guard Rail -> fence
+    86: 18 # Junction Box -> object
+    39: 3 # Lane Marking - Ambiguous -> road_marking
+    40: 3 # Lane Marking - Arrow (Ambiguous) -> road_marking
+    41: 3 # Lane Marking - Arrow (Left) -> road_marking
+    42: 3 # Lane Marking - Arrow (Other) -> road_marking
+    43: 3 # Lane Marking - Arrow (Right) -> road_marking
+    46: 3 # Lane Marking - Arrow (Split L/R or Straight) -> road_marking
+    44: 3 # Lane Marking - Arrow (Split Left or Right) -> road_marking
+    45: 3 # Lane Marking - Arrow (Split Left or Straight) -> road_marking
+    47: 3 # Lane Marking - Arrow (Split Right or Straight) -> road_marking
+    48: 3 # Lane Marking - Arrow (Straight) -> road_marking
+    49: 3 # Lane Marking - Arrow (U-Turn) -> road_marking
+    50: 3 # Lane Marking - Crosswalk -> road_marking
+    36: 3 # Lane Marking - Dashed Line -> road_marking
+    51: 3 # Lane Marking - Give Way (Row) -> road_marking
+    52: 3 # Lane Marking - Give Way (Single) -> road_marking
+    53: 3 # Lane Marking - Graphics (Ambiguous) -> road_marking
+    54: 3 # Lane Marking - Graphics (Bicycle) -> road_marking
+    55: 3 # Lane Marking - Graphics (Other) -> road_marking
+    56: 3 # Lane Marking - Graphics (Pedestrian) -> road_marking
+    57: 3 # Lane Marking - Graphics (Wheelchair) -> road_marking
+    58: 3 # Lane Marking - Hatched (Chevron) -> road_marking
+    59: 3 # Lane Marking - Hatched (Diagonal) -> road_marking
+    60: 3 # Lane Marking - Other -> road_marking
+    61: 3 # Lane Marking - Stop Line -> road_marking
+    37: 3 # Lane Marking - Straight Line -> road_marking
+    62: 3 # Lane Marking - Text (30) -> road_marking
+    63: 3 # Lane Marking - Text (40) -> road_marking
+    64: 3 # Lane Marking - Text (50) -> road_marking
+    65: 3 # Lane Marking - Text (Ambiguous) -> road_marking
+    66: 3 # Lane Marking - Text (Bus) -> road_marking
+    67: 3 # Lane Marking - Text (Other) -> road_marking
+    68: 3 # Lane Marking - Text (School) -> road_marking
+    69: 3 # Lane Marking - Text (Slow) -> road_marking
+    70: 3 # Lane Marking - Text (Stop) -> road_marking
+    71: 3 # Lane Marking - Text (Taxi) -> road_marking
+    38: 3 # Lane Marking - Zigzag Line -> road_marking
+    11: 3 # Lane Separator -> road_marking
+    87: 18 # Mailbox -> object
+    88: 18 # Manhole -> object
+    137: 9 # Motorcycle -> vehicle
+    34: 15 # Motorcyclist -> rider
+    73: 6 # Mountain -> tree
+    138: 16 # On Rails -> train
+    35: 15 # Other Rider -> rider
+    139: 9 # Other Vehicle -> vehicle
+    18: 4 # Parking -> road
+    19: 4 # Parking Aisle -> road
+    89: 18 # Parking Meter -> object
+    20: 0 # Pedestrian Area -> unclassified
+    31: 10 # Person -> pedestrian
+    32: 10 # Person Group -> pedestrian
+    90: 18 # Phone Booth -> object
+    100: 2 # Pole -> pole
+    101: 2 # Pole Group -> pole
+    91: 18 # Pothole -> object
+    21: 4 # Rail Track -> road
+    92: 1 # Ramp -> building
+    22: 4 # Road -> road
+    9: 4 # Road Median -> road
+    23: 4 # Road Shoulder -> road
+    10: 4 # Road Side -> road
+    74: 14 # Sand -> terrain
+    24: 4 # Service Lane -> road
+    25: 5 # Sidewalk -> pavement
+    93: 7 # Signage - Advertisement -> sign_symbol
+    94: 7 # Signage - Ambiguous -> sign_symbol
+    95: 7 # Signage - Back -> sign_symbol
+    96: 7 # Signage - Information -> sign_symbol
+    97: 7 # Signage - Other -> sign_symbol
+    98: 7 # Signage - Store -> sign_symbol
+    75: 17 # Sky -> sky
+    76: 0 # Snow -> unclassified
+    150: 18 # Static -> object
+    99: 18 # Street Light -> object
+    12: 8 # Temporary Barrier -> fence
+    77: 14 # Terrain -> terrain
+    104: 18 # Traffic Cone -> object
+    26: 5 # Traffic Island -> pavement
+    105: 12 # Traffic Light - Ambiguous -> traffic_light
+    106: 12 # Traffic Light - Cyclists (Back) -> traffic_light
+    107: 12 # Traffic Light - Cyclists (Front) -> traffic_light
+    108: 12 # Traffic Light - Cyclists (Side) -> traffic_light
+    109: 12 # Traffic Light - General (Horizontal/Back) -> traffic_light
+    110: 12 # Traffic Light - General (Horizontal/Front) -> traffic_light
+    111: 12 # Traffic Light - General (Horizontal/Side) -> traffic_light
+    112: 12 # Traffic Light - General (Single/Back) -> traffic_light
+    113: 12 # Traffic Light - General (Single/Front) -> traffic_light
+    114: 12 # Traffic Light - General (Single/Side) -> traffic_light
+    115: 12 # Traffic Light - General (Upright/Back) -> traffic_light
+    116: 12 # Traffic Light - General (Upright/Front) -> traffic_light
+    117: 12 # Traffic Light - General (Upright/Side) -> traffic_light
+    118: 12 # Traffic Light - Other -> traffic_light
+    119: 12 # Traffic Light - Pedestrians (Back) -> traffic_light
+    120: 12 # Traffic Light - Pedestrians (Front) -> traffic_light
+    121: 12 # Traffic Light - Pedestrians (Side) -> traffic_light
+    122: 12 # Traffic Light - Warning -> traffic_light
+    124: 7 # Traffic Sign (Back) -> sign_symbol
+    127: 7 # Traffic Sign (Front) -> sign_symbol
+    123: 7 # Traffic Sign - Ambiguous -> sign_symbol
+    125: 7 # Traffic Sign - Direction (Back) -> sign_symbol
+    126: 7 # Traffic Sign - Direction (Front) -> sign_symbol
+    128: 7 # Traffic Sign - Parking -> sign_symbol
+    129: 7 # Traffic Sign - Temporary (Back) -> sign_symbol
+    130: 7 # Traffic Sign - Temporary (Front) -> sign_symbol
+    102: 7 # Traffic Sign Frame -> sign_symbol
+    140: 9 # Trailer -> vehicle
+    131: 18 # Trash Can -> object
+    141: 9 # Truck -> vehicle
+    30: 1 # Tunnel -> building
+    151: 0 # Unlabeled -> unclassified
+    103: 2 # Utility Pole -> pole
+    78: 6 # Vegetation -> tree
+    142: 9 # Vehicle Group -> vehicle
+    13: 13 # Wall -> wall
+    79: 6 # Water -> tree
+    144: 18 # Water Valve -> object
+    143: 11 # Wheeled Slow -> bike
+    145: 17 # Wire Group -> sky

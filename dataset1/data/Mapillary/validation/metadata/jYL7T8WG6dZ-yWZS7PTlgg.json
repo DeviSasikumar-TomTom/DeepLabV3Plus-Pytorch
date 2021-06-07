@@ -1,0 +1,10 @@
+{
+  "timestamp": "2015-01-10T17:37:02", 
+  "camera_make": "SAMSUNG", 
+  "camera_model": "GT-I9300", 
+  "location": {
+    "lat": -33.430061, 
+    "lon": -70.582455
+  }, 
+  "compass": 138.37592557772132
+}
