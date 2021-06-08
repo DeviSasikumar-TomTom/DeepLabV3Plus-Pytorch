@@ -5,6 +5,7 @@ import glob
 import os.path as osp
 import random
 import numpy as np
+import torchvision.transforms as transforms
 
 import sys
 import os
@@ -130,7 +131,7 @@ if __name__ == "__main__":
     train_dataset = Mapillary(osp.join(args.data_dir, 'training'), args.label_mapping_config, training=True)
     trainloader = data.DataLoader(train_dataset, shuffle='True', batch_size=1, num_workers=4, pin_memory=True)
 
-   # cv2.namedWindow("image")
+    #cv2.namedWindow("image")
 
     trainloader_enu = enumerate(trainloader)
 
@@ -152,6 +153,6 @@ if __name__ == "__main__":
 
          image = image.transpose((1,2,0))
 
-         cv2.imshow("image", image)
-
-         cv2.waitKey()
+         # cv2.imshow("image", image)
+         # #
+         # cv2.waitKey()
