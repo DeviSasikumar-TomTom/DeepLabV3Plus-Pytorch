@@ -12,21 +12,22 @@ import sys
 import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
-sys.path.append("./")
+#sys.path.append("./")
 import transformations1 as tr
 from .transformations1 import RandomCrop
 
 
 
-class Mapillary():
+class Mapillary(data.Dataset):
 
     def __init__(self,
                  root,
                  label_map,
                  download=False,
-                 training=True):
+                 training=True,transform = None):
 
         self.root = root
+        self.transform = transform
         self.training = training
         self.files = []
         self.img_file = []
@@ -70,14 +71,15 @@ class Mapillary():
        #label1 = Image.open(self.label_file[index])
 
         if self.training:
-            return self.transforms_tr(sample)
+            sample = self.transforms_tr(sample)
         else:
-            return self.transforms_valid(sample)
+            return self.transforms_tr(self, sample)
+        return sample
 
 
 
     def __len__(self):
-        return len(self.img_file)
+        return len(self.files)
 
     def transforms_tr(self, sample):
         prob_augmentation = random.random()
@@ -114,8 +116,8 @@ if __name__ == "__main__":
 
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data-dir", type = str, default = './data/Mapillary/', help = "Path to the directory containing dataset")
-    parser.add_argument("--label-mapping-config", type = str, default= './lapel_mapping_config.yaml', help = "path to label mapping config yaml")
+    parser.add_argument("--data-dir", type = str,  help = "Path to the directory containing dataset")
+    parser.add_argument("--label-mapping-config", type = str,  help = "path to label mapping config yaml")
 
     args = parser.parse_args()
 
