@@ -14,7 +14,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 sys.path.append("./")
 import transformations1 as tr
-#from .transformations1 import RandomCrop
+from .transformations1 import RandomCrop
 
 
 
@@ -106,41 +106,41 @@ class Mapillary():
                                                   tr.ToTensor()])
         return composed_transforms(sample)
 
-# if __name__ == "__My_mapillary_loader__":
-#
-#     from torch.utils.data import DataLoader
-#     from torchvision import transforms
-#     import argparse
-#
-#
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("--data-dir", type = str, default = './data/Mapillary/', help = "Path to the directory containing dataset")
-#     parser.add_argument("--label-mapping-config", type = str, default= './lapel_mapping_config.yaml', help = "path to label mapping config yaml")
-#
-#     args = parser.parse_args()
-#
-#     train_dataset = Mapillary(osp.join(args.data_dir, 'training'), args.label_mapping_config)
-#     trainloader = data.DataLoader(train_dataset, shuffle='True', batch_size=1,num_workers=4,pin_memory=True)
-#
-#     cv2.namedWindow("image")
-#
-#     trainloader_enu = enumerate(trainloader)
-#
-#     for step in range(3):
-#
-#         batch = next(trainloader_enu)
-#
-#         index, sample = batch
-#         label = sample["label"]
-#         image = sample["image"]
-#
-#
-#
-#         image = np.array(image[0]).astype(np.uint8)
-#         label = np.array(label[0]).astype(np.uint8)
-#
-#         image = image.transpose((1,2,0))
-#
-#         cv2.imshow("image", image)
-#
-#         cv2.waitKey()
+if __name__ == "__main__":
+
+    from torch.utils.data import DataLoader
+    from torchvision import transforms
+    import argparse
+
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--data-dir", type = str, default = './data/Mapillary/', help = "Path to the directory containing dataset")
+    parser.add_argument("--label-mapping-config", type = str, default= './lapel_mapping_config.yaml', help = "path to label mapping config yaml")
+
+    args = parser.parse_args()
+
+    train_dataset = Mapillary(osp.join(args.data_dir, 'training'), args.label_mapping_config)
+    trainloader = data.DataLoader(train_dataset, shuffle='True', batch_size=1,num_workers=4,pin_memory=True)
+
+    cv2.namedWindow("image")
+
+    trainloader_enu = enumerate(trainloader)
+
+    for step in range(3):
+
+        batch = next(trainloader_enu)
+
+        index, sample = batch
+        label = sample["label"]
+        image = sample["image"]
+
+
+
+        image = np.array(image[0]).astype(np.uint8)
+        label = np.array(label[0]).astype(np.uint8)
+
+        image = image.transpose((1,2,0))
+
+        cv2.imshow("image", image)
+
+        cv2.waitKey()
