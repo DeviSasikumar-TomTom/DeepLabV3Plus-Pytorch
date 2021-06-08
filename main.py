@@ -348,10 +348,10 @@ def main():
         # =====  Train  =====
         model.train()
         cur_epochs += 1
-        for (img_file, label_file) in train_loader:
+        for (images, labels) in train_loader:
             cur_itrs += 1
 
-            images = img_file.to(device, dtype=torch.float32)
+            images = images.to(device, dtype=torch.float32)
             labels = labels.to(device, dtype=torch.long)
 
             optimizer.zero_grad()
