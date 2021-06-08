@@ -111,15 +111,17 @@ class Mapillary(data.Dataset):
                                                   tr.ToTensor()])
         return composed_transforms(sample)
 
-if __name__ == "__My_mapillary_loader1__":
+if __name__ == "__main__":
 
     from torch.utils.data import DataLoader
     from torchvision import transforms
+    import matplotlib.pyplot as plt
     import argparse
+    import os
 
     sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
     sys.path.append("./")
-    import transformations1 as tr
+    from .dataset1 import transformations1 as tr
 
 
     parser = argparse.ArgumentParser()

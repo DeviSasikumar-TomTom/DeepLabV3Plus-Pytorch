@@ -14,7 +14,6 @@ from utils import ext_transforms as et
 from metrics import StreamSegMetrics
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 #sys.path.append("./")
-import transformations1 as tr
 import torch
 import torch.nn as nn
 from utils.visualizer import Visualizer
@@ -62,9 +61,9 @@ def get_argparser():
     parser.add_argument("--step_size", type=int, default=10000)
     parser.add_argument("--crop_val", action='store_true', default=False,
                         help='crop validation (default: False)')
-    parser.add_argument("--batch_size", type=int, default=20,
+    parser.add_argument("--batch_size", type=int, default=1,
                         help='batch size (default: 16)')
-    parser.add_argument("--val_batch_size", type=int, default=20,
+    parser.add_argument("--val_batch_size", type=int, default=1,
                         help='batch size for validation (default: 4)')
     parser.add_argument("--crop_size", type=int, default=513)
 
@@ -135,6 +134,7 @@ def get_dataset(opts):
         # val_dst = VOCSegmentation(root=opts.data_root, year=opts.year,
         #                           image_set='val', download=False, transform=val_transform)
     if opts.dataset == 'mapillary':
+
 
        train_transform = transforms. Compose([transforms.Resize((360,480)),
                                               transforms.RandomHorizontalFlip(),
@@ -255,10 +255,11 @@ def main():
         opts.val_batch_size = 1
 
     train_dst,val_dst = get_dataset(opts)
-    train_loader = data.DataLoader(train_dst, batch_size=1, shuffle=True, num_workers=4)
-    val_loader = data.DataLoader(val_dst, batch_size=1, shuffle=True, num_workers=4)
+    train_loader = data.DataLoader(train_dst, batch_size=2, shuffle=True, num_workers=4)
+    val_loader = data.DataLoader(val_dst, batch_size=2, shuffle=True, num_workers=4)
 
     print("Dataset: %s, Train set: %d, Val set: %d" %(opts.dataset, len(train_dst), len(val_dst)))
+
 
 
     # Set up model
@@ -351,11 +352,24 @@ def main():
         # =====  Train  =====
         model.train()
         cur_epochs += 1
-        for (images, labels) in train_loader:
-            cur_itrs += 1
+        # for (images, labels) in train_loader:
+        #
+        #     cur_itrs += 1
+        #
+        #     images = images.to(device, dtype=torch.float32)
+        #     labels = labels.to(device, dtype=torch.long)
+        trainloader_iter = enumerate(train_loader)
+        for step in range(3):
+            batch = next(trainloader_iter)
+            index, sample = batch
+            label = sample["label"]
+            image = sample["image"]
 
-            images = images.to(device, dtype=torch.float32)
-            labels = labels.to(device, dtype=torch.long)
+            # image = np.array(image[0]).astype(np.uint8)
+            # label = np.array(label[0]).astype(np.uint8)
+
+            images = image.to(device, dtype=torch.float32)
+            labels = label.to(device, dtype = torch.long)
 
             optimizer.zero_grad()
             outputs = model(images)

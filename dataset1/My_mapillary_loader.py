@@ -85,8 +85,6 @@ class Mapillary():
 
 
 
-    def __len__(self):
-        return len(self.files)
 
     def transforms_tr(self, sample):
         prob_augmentation = random.random()
