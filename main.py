@@ -172,46 +172,54 @@ def validate(opts, model, loader, device, metrics, ret_samples_ids=None):
         img_id = 0
 
     with torch.no_grad():
-        for i, (images, labels) in tqdm(enumerate(loader)):
+        #for i, (images, labels) in tqdm(enumerate(loader)):
 
-            images = images.to(device, dtype=torch.float32)
-            labels = labels.to(device, dtype=torch.long)
 
-            outputs = model(images)
-            preds = outputs.detach().max(dim=1)[1].cpu().numpy()
-            targets = labels.cpu().numpy()
+        loader_enu = enumerate(loader)
+        for step in range(2):
+             batch = next(loader_enu)
+             i, sample = batch
+             labels = sample["label"]
+             images = sample["image"]
 
-            metrics.update(targets, preds)
-            if ret_samples_ids is not None and i in ret_samples_ids:  # get vis samples
-                ret_samples.append(
-                    (images[0].detach().cpu().numpy(), targets[0], preds[0]))
+        images = images.to(device, dtype=torch.float32)
+        labels = labels.to(device, dtype=torch.long)
 
-            if opts.save_val_results:
-                for i in range(len(images)):
-                    image = images[i].detach().cpu().numpy()
-                    target = targets[i]
-                    pred = preds[i]
+        outputs = model(images)
+        preds = outputs.detach().max(dim=1)[1].cpu().numpy()
+        targets = labels.cpu().numpy()
 
-                    image = (denorm(image) * 255).transpose(1, 2, 0).astype(np.uint8)
-                    target = loader.dataset.decode_target(target).astype(np.uint8)
-                    pred = loader.dataset.decode_target(pred).astype(np.uint8)
+        metrics.update(targets, preds)
+        if ret_samples_ids is not None and i in ret_samples_ids:  # get vis samples
+            ret_samples.append(
+                (images[0].detach().cpu().numpy(), targets[0], preds[0]))
 
-                    Image.fromarray(image).save('results/%d_image.png' % img_id)
-                    Image.fromarray(target).save('results/%d_target.png' % img_id)
-                    Image.fromarray(pred).save('results/%d_pred.png' % img_id)
+        if opts.save_val_results:
+            for i in range(len(images)):
+                image = images[i].detach().cpu().numpy()
+                target = targets[i]
+                pred = preds[i]
 
-                    fig = plt.figure()
-                    plt.imshow(image)
-                    plt.axis('off')
-                    plt.imshow(pred, alpha=0.7)
-                    ax = plt.gca()
-                    ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                    ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-                    plt.savefig('results/%d_overlay.png' % img_id, bbox_inches='tight', pad_inches=0)
-                    plt.close()
-                    img_id += 1
+                image = (denorm(image) * 255).transpose(1, 2, 0).astype(np.uint8)
+                target = loader.dataset.decode_target(target).astype(np.uint8)
+                pred = loader.dataset.decode_target(pred).astype(np.uint8)
 
-        score = metrics.get_results()
+                Image.fromarray(image).save('results/%d_image.png' % img_id)
+                Image.fromarray(target).save('results/%d_target.png' % img_id)
+                Image.fromarray(pred).save('results/%d_pred.png' % img_id)
+
+                fig = plt.figure()
+                plt.imshow(image)
+                plt.axis('off')
+                plt.imshow(pred, alpha=0.7)
+                ax = plt.gca()
+                ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
+                ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
+                plt.savefig('results/%d_overlay.png' % img_id, bbox_inches='tight', pad_inches=0)
+                plt.close()
+                img_id += 1
+
+    score = metrics.get_results()
     return score, ret_samples
 
 
