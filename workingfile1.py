@@ -53,7 +53,7 @@ def get_argparser():
     parser.add_argument("--test_only", action='store_true', default=False)
     parser.add_argument("--save_val_results", action='store_true', default=False,
                         help="save segmentation results to \"./results\"")
-    parser.add_argument("--total_itrs", type=int, default=2,
+    parser.add_argument("--total_itrs", type=int, default=30e3,
                         help="epoch number (default: 30k)")
     parser.add_argument("--lr", type=float, default=0.01,
                         help="learning rate (default: 0.01)")
@@ -363,9 +363,10 @@ def main():
         #
         #     images = images.to(device, dtype=torch.float32)
         #     labels = labels.to(device, dtype=
-        #trainloader_iter = enumerate(train_loader)
+
+        trainloader_iter = enumerate(train_loader)
         for step in range(3):
-            batch = next(enumerate(train_loader))
+            batch = next(trainloader_iter)
             index, sample = batch
             label = sample["label"]
             image = sample["image"]
@@ -427,7 +428,7 @@ def main():
                         vis.vis_image('Sample %d' % k, concat_img)
                 model.train()
             scheduler.step()
-            cur_itrs += 1
+
             if cur_itrs >= opts.total_itrs:
                 return
 
